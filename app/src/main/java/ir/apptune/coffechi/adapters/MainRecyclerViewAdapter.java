@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -65,6 +67,7 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         public void bind(final MainRecyclerViewModel model, final OnItemClickListener listener) {
             txtRestaurantName.setText(model.getRestaurantName());
             showRateRestaurant.setRating(Float.parseFloat(model.getRestaurantRate()) / 20);
+            Picasso.with(context).load(model.getRestaurantImage()).resize(110,110).into(imgRestaurant);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
