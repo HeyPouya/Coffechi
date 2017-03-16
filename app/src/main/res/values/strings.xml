@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Coffechi</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="error">Error!</string>
+    <string name="please_check_your_connection">Please Check your connection</string>
+    <string name="please_wait">Please Wait</string>
+    <string name="please_check_your_number">Please check your number</string>
+    <string name="press_back_again_to_quit">Press Back Again to Quit</string>
+    <string name="please_enter_your_number">Please Enter your Number</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_a_member_login">Already a member? Login</string>
+</resources>
