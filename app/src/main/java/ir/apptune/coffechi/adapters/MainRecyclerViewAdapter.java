@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -67,7 +66,7 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         public void bind(final MainRecyclerViewModel model, final OnItemClickListener listener) {
             txtRestaurantName.setText(model.getRestaurantName());
             showRateRestaurant.setRating(Float.parseFloat(model.getRestaurantRate()) / 20);
-            Picasso.with(context).load(model.getRestaurantImage()).resize(110,110).into(imgRestaurant);
+            Picasso.with(context).load(model.getRestaurantImage()).resize(105,105).into(imgRestaurant);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
