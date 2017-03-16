@@ -1,6 +1,8 @@
 package ir.apptune.coffechi.models;
 
 public class ConstantsClass {
+
+    public static final String TAG = "CostumLog";
     public static final String USER_NAME = "Coffechi_user";
     public static final String PASS = "Coffechi@coffechiurl%#1258963?$";
 
