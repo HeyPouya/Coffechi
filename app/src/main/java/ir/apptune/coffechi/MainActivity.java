@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +28,8 @@ import ir.apptune.coffechi.utilities.UtilityClass;
 import ir.apptune.coffechi.webServiceClass.WebServiceClass;
 
 import static ir.apptune.coffechi.models.ConstantsClass.MAIN_RESTAURANT_DATA_URL;
+import static ir.apptune.coffechi.models.ConstantsClass.PASS;
+import static ir.apptune.coffechi.models.ConstantsClass.USER_NAME;
 import static ir.apptune.coffechi.models.ConstantsClass.USER_PHONE_NUMBER;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
@@ -46,18 +47,30 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     ArrayList<ParamsWebserviceModel> params;
     MainRecyclerViewAdapter adapter;
     UtilityClass utility;
-
+    private int visibleThreshold = 2;
+    private int lastVisibleItem, totalItemCount;
+    private boolean loading = false;
+    private OnLoadMoreListener onLoadMoreListener;
+    int counter = 1;
+    int totalItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
         userNumber = PreferenceManager.getDefaultSharedPreferences(this).getString(USER_PHONE_NUMBER, "NA");
         if (userNumber.equals("NA")) {
             startActivity(new Intent(this, Welcome.class));
             finish();
         }
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+        onLoadMoreListener = new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                showData(counter);
+            }
+        };
+
 
         swipeToRefresh.setOnRefreshListener(this);
 
@@ -65,22 +78,38 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         list = new ArrayList<>();
         pd = new ProgressDialog(this);
         setSupportActionBar(toolbar);
-        ParamsWebserviceModel paramsWebserviceModel = new ParamsWebserviceModel("PageID", "1");
-        params = new ArrayList<>();
-        params.add(paramsWebserviceModel);
         adapter = new MainRecyclerViewAdapter(this, new OnItemClickListener() {
             @Override
             public void OnClickItem(MainRecyclerViewModel model) {
-                Toast.makeText(MainActivity.this, "Clicked!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, InsideCoffeeActivity.class);
+                intent.putExtra("ID", model.getId());
+                intent.putExtra("MainPhoto", model.getRestaurantImage());
+                startActivity(intent);
             }
         }, list);
-        showData();
+        showData(counter);
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                totalItemCount = layoutManager.getItemCount();
+                lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+                if (!loading && totalItemCount <= (lastVisibleItem + visibleThreshold) && totalItemCount < totalItems) {
+                    if (onLoadMoreListener != null) {
+                        onLoadMoreListener.onLoadMore();
+                        loading = true;
+                    }
+                }
+            }
+        });
 
     }
 
-    public void showData() {
+    public void showData(final int PageCount) {
         if (utility.isNetworkAvailable(this)) {
             new AsyncTask<String, String, JSONObject>() {
                 @Override
@@ -89,12 +118,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     pd.setMessage(getString(R.string.please_wait));
                     pd.setCancelable(false);
                     pd.show();
+                    ParamsWebserviceModel paramsWebserviceModel = new ParamsWebserviceModel("PageID", String.valueOf(PageCount));
+                    params = new ArrayList<>();
+                    params.add(paramsWebserviceModel);
                 }
 
                 @Override
                 protected JSONObject doInBackground(String... strings) {
                     WebServiceClass webService = new WebServiceClass();
-                    JSONObject response = webService.getData(MAIN_RESTAURANT_DATA_URL, params, null, null);
+                    JSONObject response = webService.getData(MAIN_RESTAURANT_DATA_URL, params, USER_NAME, PASS);
                     return response;
                 }
 
@@ -106,12 +138,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     }
                     if (response != null) {
                         try {
+                            counter++;
+                            loading = false;
                             responseList = response.getJSONArray("List");
+                            totalItems = Integer.parseInt(response.getString("TotalResponseCount"));
                             for (int i = 0; i < responseList.length(); i++) {
                                 model = new MainRecyclerViewModel();
                                 JSONObject object = responseList.getJSONObject(i);
                                 model.setRestaurantImage(object.getString("Photo"));
                                 //  model.setDistance(object.getString(""));
+                                model.setId(object.getString("ID"));
                                 model.setRestaurantName(object.getString("Title"));
                                 model.setRestaurantRate(object.getString("Content"));
                                 list.add(model);
@@ -122,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         }
                         adapter.notifyDataSetChanged();
                     } else {
-                        pd.dismiss();
+                        dismissProgressDialog();
                         showTryAgainAlert();
                     }
 
@@ -138,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         new AlertDialog.Builder(this).setMessage(getString(R.string.please_check_your_connection)).setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                showData();
+                showData(counter);
             }
         }).setCancelable(false).show();
 
@@ -146,6 +182,23 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onRefresh() {
-        showData();
+        list.clear();
+        counter = 1;
+        showData(counter);
+        loading = false;
     }
+
+    private void dismissProgressDialog() {
+        if (pd != null && pd.isShowing()) {
+            pd.dismiss();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        dismissProgressDialog();
+        super.onDestroy();
+    }
+
+
 }

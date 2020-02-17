@@ -8,7 +8,8 @@ public class ConstantsClass {
 
     public static final String VERIFICATION_URL = "http://coffechi.ir/API/InserUserStatus.aspx";
     public static final String SIGN_UP_URL = "http://coffechi.ir/API/Insertuser.aspx";
-    public static final String MAIN_RESTAURANT_DATA_URL = "http://coffechi.ir/panel/test.aspx";
+    public static final String MAIN_RESTAURANT_DATA_URL = "http://coffechi.ir/API/SelectCoffe.aspx";
+    public static final String INSIDE_RESTAURANT_DATA_URL = "http://coffechi.ir/API/SelectCoffeByID.aspx";
 
     public static final String USER_PHONE_NUMBER = "UserPhoneNumber";
 

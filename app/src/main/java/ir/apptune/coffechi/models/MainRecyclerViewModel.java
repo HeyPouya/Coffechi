@@ -1,11 +1,21 @@
 package ir.apptune.coffechi.models;
 
 public class MainRecyclerViewModel {
+    String id;
     String restaurantName;
     String restaurantImage;
     String restaurantPriceRange;
     String distance;
     String restaurantRate;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
 
     public String getRestaurantRate() {
         return restaurantRate;

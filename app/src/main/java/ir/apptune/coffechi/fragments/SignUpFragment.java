@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ir.apptune.coffechi.R;
-import ir.apptune.coffechi.utilities.UtilityClass;
 import ir.apptune.coffechi.VerificationActivity;
-import ir.apptune.coffechi.webServiceClass.WebServiceClass;
 import ir.apptune.coffechi.models.ParamsWebserviceModel;
+import ir.apptune.coffechi.utilities.UtilityClass;
+import ir.apptune.coffechi.webServiceClass.WebServiceClass;
 
 import static ir.apptune.coffechi.models.ConstantsClass.PASS;
 import static ir.apptune.coffechi.models.ConstantsClass.SIGN_UP_URL;
@@ -119,7 +119,7 @@ public class SignUpFragment extends Fragment {
                                         intent1.putExtra("number", number);
                                         startActivity(intent1);
                                         break;
-                                    case 3:
+                                    case 10:
                                         pd.dismiss();
                                         txtSignUpError.setText("SomeThing Strange Happend! Please Try Again");
                                         break;
